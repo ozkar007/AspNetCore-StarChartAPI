@@ -10,6 +10,7 @@ namespace StarChart.Controllers
 {
     /// <summary>
     /// Controller with routes to the API end-points
+    /// end-points accept different attributes
     /// </summary>
     [Route("")]
     [ApiController]
@@ -44,28 +45,31 @@ namespace StarChart.Controllers
             return Ok(celestialObject);
         }
 
-        //add attribute to endPoint
         [HttpGet("{name}")]
         public IActionResult GetByName(string name)
         {
-            CelestialObject celestialObject = 
-                new CelestialObject();
-            if (_context.CelestialObjects.Where(x => x.Name == name) == null)
-                NotFound();
+            CelestialObject celestialObject = new CelestialObject();
+            if (_context.CelestialObjects.FirstOrDefault(x => x.Name == name) == null)
+                return NotFound();
             else
             {
                 //wrap DbSet into List
                 _context.CelestialObjects.ToList().ForEach(delegate(CelestialObject celesOb)
                 {
-                    //celestialObject match OrbitedObjectId and Id
-                    if (celesOb.OrbitedObjectId == celesOb.Id && celesOb.Name == name)
-                        celestialObject.Satellites.Add(celesOb);
+                    //filter celestialObject by name and set ids
+                    if (celesOb.Name == name)
+                    {
+                        celestialObject.OrbitedObjectId = celesOb.Id;
+                        celestialObject.Id = celesOb.Id;
+                        celestialObject.Name = celesOb.Name;
+                        celestialObject.Satellites = new List<CelestialObject>() { celestialObject };
+                    }
                 });
             }
 
             //return status code OK and with all celestialObjects
             //match by name
-            return Ok(celestialObject);
+            return Ok(celestialObject.Satellites);
         }
 
         [HttpGet]
