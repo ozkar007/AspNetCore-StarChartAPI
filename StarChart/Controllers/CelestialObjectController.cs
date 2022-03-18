@@ -78,10 +78,13 @@ namespace StarChart.Controllers
             CelestialObject celestialObject = new CelestialObject();
             _context.CelestialObjects.ToList().ForEach(delegate(CelestialObject celesOb) 
             {
-                celestialObject.Satellites.Add(celesOb);
+                celestialObject.OrbitedObjectId = celesOb.Id;
+                celestialObject.Id = celesOb.Id;
+                celestialObject.Name = celesOb.Name;
+                celestialObject.Satellites = new List<CelestialObject>() { celestialObject };
             });
 
-            return Ok(celestialObject);
+            return Ok(celestialObject.Satellites);
         }
     }
 }
