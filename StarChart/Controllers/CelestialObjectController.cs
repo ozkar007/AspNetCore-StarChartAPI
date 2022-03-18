@@ -26,27 +26,30 @@ namespace StarChart.Controllers
         [HttpGet("{id:int}", Name = "GetById")]
         public IActionResult GetById(int id) 
         {
-            CelestialObject celestialObject = new CelestialObject();
-            if (_context.FindAsync<CelestialObject>().Id != id)
+            CelestialObject celestialObject;
+            if (_context.CelestialObjects.FirstOrDefault(t => t.Id == id) == null)
             {
                 return NotFound();//record not found CelestialObject
             }
             else
             {
-                //search DbSet using LinQ for a CelestialObject object 
-                //match CelestialObject object with endpoint parameter id
-                //add to collection
-                celestialObject = _context.CelestialObjects.Where(x => x.OrbitedObjectId == id).FirstOrDefault();
-                celestialObject.Satellites.Add(celestialObject);
+                //search DbSet
+                //***match based on Id and parameter id
+                celestialObject = _context.CelestialObjects.FirstOrDefault(x => x.Id == id);
+                //need to instantiate the new CelestialObject
+                celestialObject.Satellites = new List<CelestialObject>() { celestialObject };
             }
-            return Ok();
+
+            //return OK status code with matching CelestialObject object
+            return Ok(celestialObject);
         }
 
         //add attribute to endPoint
         [HttpGet("{name}")]
         public IActionResult GetByName(string name)
         {
-            CelestialObject celestialObject = new CelestialObject();
+            CelestialObject celestialObject = 
+                new CelestialObject();
             if (_context.CelestialObjects.Where(x => x.Name == name) == null)
                 NotFound();
             else
